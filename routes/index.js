@@ -33,7 +33,7 @@ router.post('/users', async (req, res, next) => {
 
 router.get('/filter', async (req, res, next) => {
   try {
-    const filterInfo = await FilterInfo.find({});
+    const filterInfo = await FilterInfo.find({}).populate('forPatient');
     return res.status(200).json({ msg: "success", data: filterInfo })
   } catch (e) {
     console.log(e)
@@ -55,7 +55,7 @@ router.post('/filter', async (req, res, next) => {
 
 router.get('/patient', async (req, res, next) => {
   try {
-    const patientInfo = await PatientInfo.find({});
+    const patientInfo = await PatientInfo.find({}).populate('filterInfo');
     return res.status(200).json({ msg: "success", data: patientInfo })
   } catch (e) {
     console.log(e)
