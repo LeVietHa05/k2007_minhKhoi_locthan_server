@@ -41,10 +41,33 @@ router.get('/filter', async (req, res, next) => {
   }
 })
 
-router.post('/filter', async (req, res, next) => {
+router.post('/filter/:id', async (req, res, next) => {
   try {
-    const { id, used, description, isFinished, forPatient } = req.body;
-    const newFilter = new FilterInfo({ id, used, description, isFinished, forPatient });
+    const { used, description, isFinished, forPatient } = req.body;
+    const id = req.params.id;
+    const newFilter = await FilterInfo.findOne({ id: id })
+    newFilter.used = used;
+    newFilter.description = description;
+    newFilter.isFinished = isFinished;
+    newFilter.forPatient = forPatient
+
+    await newFilter.save();
+    return res.status(200).json({ msg: "success", data: newFilter })
+  } catch (e) {
+    console.log(e)
+    return res.status(200).json({ msg: "fail", data: "Fail to save. Check data" })
+  }
+})
+router.post('/newFilter', async (req, res, next) => {
+  try {
+    let highestFilterID = await FilterInfo.find({}).sort({ id: -1 }).limit(1);
+    let newFilter = new FilterInfo({
+      id: highestFilterID[0].id + 1,
+      used: 0,
+      description: "new filter",
+      isFinished: false,
+      forPatient: []
+    });
     await newFilter.save();
     return res.status(200).json({ msg: "success", data: newFilter })
   } catch (e) {
@@ -63,10 +86,35 @@ router.get('/patient', async (req, res, next) => {
   }
 })
 
-router.post('/patient', async (req, res, next) => {
+router.post('/patient/:id', async (req, res, next) => {
   try {
-    const { id, name, age, phone, filterInfo, schedule } = req.body;
-    const newPatient = new PatientInfo({ id, name, age, phone, filterInfo, schedule });
+    const { name, age, phone, filterInfo, schedule } = req.body;
+    const id = req.params.id;
+    const newPatient = await
+      Patient
+        .findOne({ id: id })
+        .populate('filterInfo');
+    newPatient.name = name;
+    newPatient.age = age;
+    newPatient.phone = phone;
+    newPatient.filterInfo = filterInfo;
+    newPatient.schedule = schedule;
+    await newPatient.save();
+    return res.status(200).json({ msg: "success", data: newPatient })
+  } catch (e) {
+    console.log(e)
+    return res.status(200).json({ msg: "fail", data: "Fail to save. Check data" })
+  }
+})
+
+router.post('/newpatient', async (req, res, next) => {
+  try {
+    const { name, age, phone, filterID, schedule } = req.body;
+    const newPatient = new PatientInfo({ id, name, age, phone, schedule });
+    const filter = await FilterInfo.findOne({ id: filterID });
+    newPatient.filterInfo = filter._id;
+    const highestPatientID = await PatientInfo.find({}).sort({ id: -1 }).limit(1);
+    newPatient.id = highestPatientID[0].id + 1;
     await newPatient.save();
     return res.status(200).json({ msg: "success", data: newPatient })
   } catch (e) {
