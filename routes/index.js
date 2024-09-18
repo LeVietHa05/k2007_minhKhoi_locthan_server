@@ -46,10 +46,10 @@ router.post('/filter/:id', async (req, res, next) => {
     const { used, description, isFinished, forPatient } = req.body;
     const id = req.params.id;
     const newFilter = await FilterInfo.findOne({ id: id })
-    newFilter.used = used;
+    newFilter.used = +used;
     newFilter.description = description;
     newFilter.isFinished = isFinished;
-    newFilter.forPatient = forPatient
+    newFilter.forPatient.push(...forPatient)
 
     await newFilter.save();
     return res.status(200).json({ msg: "success", data: newFilter })
@@ -62,7 +62,7 @@ router.post('/newFilter', async (req, res, next) => {
   try {
     let highestFilterID = await FilterInfo.find({}).sort({ id: -1 }).limit(1);
     let newFilter = new FilterInfo({
-      id: highestFilterID[0].id + 1,
+      id: +highestFilterID[0].id + 1,
       used: 0,
       description: "new filter",
       isFinished: false,
@@ -93,12 +93,12 @@ router.post('/patient/:id', async (req, res, next) => {
     const newPatient = await
       Patient
         .findOne({ id: id })
-        .populate('filterInfo');
-    newPatient.name = name;
-    newPatient.age = age;
-    newPatient.phone = phone;
-    newPatient.filterInfo = filterInfo;
-    newPatient.schedule = schedule;
+    // .populate('filterInfo');
+    newPatient.name = name ? name : newPatient.name;
+    newPatient.age = age ? age : newPatient.age;
+    newPatient.phone = phone ? phone : newPatient.phone;
+    newPatient.filterInfo[0] = filterInfo.id ? filterInfo.id : newPatient.filterInfo[0];
+    newPatient.schedule = schedule
     await newPatient.save();
     return res.status(200).json({ msg: "success", data: newPatient })
   } catch (e) {
@@ -110,11 +110,14 @@ router.post('/patient/:id', async (req, res, next) => {
 router.post('/newpatient', async (req, res, next) => {
   try {
     const { name, age, phone, filterID, schedule } = req.body;
-    const newPatient = new PatientInfo({ id, name, age, phone, schedule });
-    const filter = await FilterInfo.findOne({ id: filterID });
-    newPatient.filterInfo = filter._id;
+    console.log(name, age, phone, filterID, schedule)
     const highestPatientID = await PatientInfo.find({}).sort({ id: -1 }).limit(1);
-    newPatient.id = highestPatientID[0].id + 1;
+    const newPatient = new PatientInfo({ id: +highestPatientID[0].id + 1, name, age, phone, schedule });
+    const filter = await FilterInfo.findOne({ id: filterID });
+    if (filter) {
+      console.log(filter)
+      newPatient.filterInfo = filter._id;
+    }
     await newPatient.save();
     return res.status(200).json({ msg: "success", data: newPatient })
   } catch (e) {
