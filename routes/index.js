@@ -21,8 +21,9 @@ router.get('/users', async (req, res, next) => {
 
 router.post('/users', async (req, res, next) => {
   try {
-    const { accountID, email, password, role } = req.body;
-    const newUser = new Account({ accountID, email, password, role });
+    const { email, password, role } = req.body;
+    const oldAcc = await Account.find({}).sort({ accountID: -1 }).limit(1);
+    const newUser = new Account({ accountID: +oldAcc.accountID + 1, email, password, role });
     await newUser.save();
     return res.status(200).json({ msg: "success", data: newUser })
   } catch (e) {
