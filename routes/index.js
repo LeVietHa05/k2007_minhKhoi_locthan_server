@@ -44,15 +44,25 @@ router.get('/filter', async (req, res, next) => {
 
 router.post('/filter/:id', async (req, res, next) => {
   try {
-    const { used, description, isFinished, forPatient } = req.body;
+    let { used, description, isFinished, forPatient } = req.body;
     const id = req.params.id;
     const newFilter = await FilterInfo.findOne({ id: id })
     newFilter.used = +used;
     newFilter.description = description;
     newFilter.isFinished = isFinished;
-    newFilter.forPatient.push(...forPatient)
+    //check if type of forPatient is array
+    if (!Array.isArray(forPatient)) {
+      //test case
+      //real case is array already
+      forPatient = forPatient.split(',');
+    }
+    console.log(forPatient)
+    let newPatient = await getPatientInfo(forPatient); //get patient info from id
+    console.log(newPatient)
+    newFilter.forPatient = newPatient;
 
     await newFilter.save();
+    await updateFilterInfo(newPatient, newFilter._id);
     return res.status(200).json({ msg: "success", data: newFilter })
   } catch (e) {
     console.log(e)
@@ -90,6 +100,7 @@ router.get('/patient', async (req, res, next) => {
 router.post('/patient/:id', async (req, res, next) => {
   try {
     const { name, age, phone, filterInfo, schedule } = req.body;
+    filterInfo = filterInfo.id ? filterInfo.id : newPatient.filterInfo[0];
     const id = req.params.id;
     const newPatient = await
       PatientInfo
@@ -98,8 +109,9 @@ router.post('/patient/:id', async (req, res, next) => {
     newPatient.name = name ? name : newPatient.name;
     newPatient.age = age ? age : newPatient.age;
     newPatient.phone = phone ? phone : newPatient.phone;
-    newPatient.filterInfo[0] = filterInfo.id ? filterInfo.id : newPatient.filterInfo[0];
+    newPatient.filterInfo = filterInfo;
     newPatient.schedule = schedule
+    await FilterInfo.findOneAndUpdate({ id: filterInfo }, { forPatient: newPatient._id });
     await newPatient.save();
     return res.status(200).json({ msg: "success", data: newPatient })
   } catch (e) {
@@ -126,5 +138,40 @@ router.post('/newpatient', async (req, res, next) => {
     return res.status(200).json({ msg: "fail", data: "Fail to save. check data" })
   }
 })
+
+
+async function getPatientInfo(arrayOfId) {
+  try {
+    let output = [];
+    for (let i = 0; i < arrayOfId.length; i++) {
+      let patient = await PatientInfo.findOne({ id: arrayOfId[i] });
+      if (patient) {
+        output.push(patient._id);
+      }
+    }
+    return output;
+  } catch (e) {
+    console.log(e)
+    return null;
+  }
+}
+
+
+async function updateFilterInfo(arrOfPatientID, filterID) {
+  try {
+    for (let i = 0; i < arrOfPatientID.length; i++) {
+      let patient = await PatientInfo.findOne({ _id: arrOfPatientID[i] });
+      if (patient) {
+        patient.filterInfo = filterID;
+        await patient.save();
+      }
+    }
+    return true;
+  } catch (e) {
+    console.log(e)
+    return false;
+  }
+
+}
 
 module.exports = router;
