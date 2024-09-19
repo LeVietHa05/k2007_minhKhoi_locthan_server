@@ -23,7 +23,7 @@ router.post('/users', async (req, res, next) => {
   try {
     const { email, password, role } = req.body;
     const oldAcc = await Account.find({}).sort({ accountID: -1 }).limit(1);
-    const newUser = new Account({ accountID: +oldAcc.accountID + 1, email, password, role });
+    const newUser = new Account({ accountID: +oldAcc[0].accountID + 1, email, password, role });
     await newUser.save();
     return res.status(200).json({ msg: "success", data: newUser })
   } catch (e) {
@@ -92,7 +92,7 @@ router.post('/patient/:id', async (req, res, next) => {
     const { name, age, phone, filterInfo, schedule } = req.body;
     const id = req.params.id;
     const newPatient = await
-      Patient
+      PatientInfo
         .findOne({ id: id })
     // .populate('filterInfo');
     newPatient.name = name ? name : newPatient.name;
