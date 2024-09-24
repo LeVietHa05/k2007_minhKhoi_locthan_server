@@ -5,10 +5,10 @@ const patientInfoSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // accountID: {
-    //     type: String,
-    //     required: true
-    // },
+    accountID: {
+        type: String,
+        // required: true
+    },
     name: {
         type: String,
         required: true

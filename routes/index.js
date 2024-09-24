@@ -131,6 +131,20 @@ router.post('/patient/:id', async (req, res, next) => {
   }
 })
 
+router.post('/linkacctofilter', async (req, res) => {
+  try {
+    const { accountID, patientID } = req.body;
+    let patient = await PatientInfo.findOne({ id: patientID });
+    patient.accountID = accountID;
+    await patient.save();
+    return res.status(200).json({ msg: "success", data: patient });
+  } catch (e) {
+    console.log(e)
+    return res.status(200).json({ msg: "fail", data: "Fail to save. Check data" })
+  }
+
+})
+
 router.post('/newpatient', async (req, res, next) => {
   try {
     const { name, age, phone, filterID, schedule } = req.body;
