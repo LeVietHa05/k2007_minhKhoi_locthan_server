@@ -42,6 +42,27 @@ router.get('/filter', async (req, res, next) => {
   }
 })
 
+router.get('/increaefilterused', async (req, res) => {
+  try {
+    const { filterID } = req.body;
+    let filter
+    if (filterID) {
+      filter = await FilterInfo.findOne({
+        id: filterID
+      });
+    }
+    if (filter) {
+      filter.used += 1;
+      await filter.save();
+      return res.status(200).json({ msg: "success", data: filter });
+    }
+    return res.status(200).json({ msg: "fail", data: "no data found" });
+  } catch (e) {
+    console.log(e)
+    return res.status(200).json({ msg: "fail", data: "Fail to save. Check data" })
+  }
+})
+
 router.post('/filter/:id', async (req, res, next) => {
   try {
     let { used, description, isFinished, forPatient } = req.body;
