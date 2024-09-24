@@ -22,7 +22,21 @@ router.get('/users', async (req, res, next) => {
 router.post('/users', async (req, res, next) => {
   try {
     const { email, password, role } = req.body;
-    const oldAcc = await Account.find({}).sort({ accountID: -1 }).limit(1);
+    //because accountID is string, we need to convert it to int to sort
+    const oldAcc = await Account.aggregate([
+      {
+        $addFields: {
+          numericAccountID: {
+            $toInt: "$accountID"
+          }
+        }
+      }, {
+        $sort: {
+          numericAccountID: -1
+        }
+      }, {
+        $limit: 1
+      }]);
     const newUser = new Account({ accountID: +oldAcc[0].accountID + 1, email, password, role });
     await newUser.save();
     return res.status(200).json({ msg: "success", data: newUser })
