@@ -97,6 +97,17 @@ router.get('/patient', async (req, res, next) => {
   }
 })
 
+router.get('/patient/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const patientInfo = await PatientInfo.findOne({ id: id }).populate('filterInfo');
+    return res.status(200).json({ msg: "success", data: patientInfo })
+  } catch (e) {
+    console.log(e)
+    return res.status(404).json({ msg: "fail", data: "no data found" })
+  }
+})
+
 router.post('/patient/:id', async (req, res, next) => {
   try {
     const { name, age, phone, filterInfo, schedule } = req.body;
