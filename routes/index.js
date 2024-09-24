@@ -58,11 +58,11 @@ router.get('/filter', async (req, res, next) => {
 
 router.get('/increaefilterused', async (req, res) => {
   try {
-    const { filterID } = req.body;
+    const { id } = req.query;
     let filter
-    if (filterID) {
+    if (id) {
       filter = await FilterInfo.findOne({
-        id: filterID
+        id: id
       });
     }
     if (filter) {
