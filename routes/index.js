@@ -131,8 +131,11 @@ router.get('/patient/:id', async (req, res, next) => {
 
 router.post('/patient/:id', async (req, res, next) => {
   try {
-    const { name, age, phone, filterInfo, schedule } = req.body;
-    filterInfo = filterInfo.id ? filterInfo.id : newPatient.filterInfo[0];
+    let { name, age, phone, filterInfo, schedule } = req.body;
+    filterInfo = await getFilterID(filterInfo.id);
+    if (!filterInfo) {
+      return res.status(200).json({ msg: "fail", data: "filter ID problem need to be BSON type or it can't be found" })
+    }
     const id = req.params.id;
     const newPatient = await
       PatientInfo
@@ -218,6 +221,17 @@ async function updateFilterInfo(arrOfPatientID, filterID) {
     return false;
   }
 
+}
+async function getFilterID(id) {
+  try {
+    let filter = await FilterInfo.findOne({
+      id: id
+    });
+    return filter._id;
+  } catch (e) {
+    console.log(e)
+    return null;
+  }
 }
 
 module.exports = router;
