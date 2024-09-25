@@ -143,6 +143,20 @@ router.get('/patient/:id', async (req, res, next) => {
   }
 })
 
+router.get('/patientbyaccid/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const patientInfo = await PatientInfo
+      .findOne({ accountID: id })
+      .populate('filterInfo');
+    
+    return res.status(200).json({ msg: "success", data: patientInfo })
+  } catch (e) {
+    console.log(e)
+    return res.status(404).json({ msg: "fail", data: "no data found" })
+  }
+})
+
 router.post('/patient/:id', async (req, res, next) => {
   try {
     let { name, age, phone, filterInfo, schedule } = req.body;
