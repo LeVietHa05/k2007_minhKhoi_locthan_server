@@ -9,27 +9,27 @@ mongoose.connect(process.env.DB_URI)
     .then(async (result) => {
         console.log("db connected")
         //clean db
-//         await Account.deleteMany({})
-//         await filterInfo.deleteMany({})
-//         await PatientInfo.deleteMany({})
-// 
-// 
-//         for (acc of userAccounts) {
-//             //create newacc from userAccount
-//             let newAcc = await Account.create(acc)
-//             console.log(newAcc)
-//             let res = await newAcc.save()
-//         }
-//         for (filter of filterListData) {
-//             let newFilter = await filterInfo.create(filter)
-//             console.log(newFilter)
-//             let res = await newFilter.save()
-//         }
-//         for (patient of patientData) {
-//             let newPat = await PatientInfo.create(patient)
-//             console.log(newPat)
-//             let res = await newPat.save();
-//         }
+        await Account.deleteMany({})
+        await filterInfo.deleteMany({})
+        await PatientInfo.deleteMany({})
+
+
+        for (acc of userAccounts) {
+            //create newacc from userAccount
+            let newAcc = await Account.create(acc)
+            console.log(newAcc)
+            let res = await newAcc.save()
+        }
+        for (filter of filterListData) {
+            let newFilter = await filterInfo.create(filter)
+            console.log(newFilter)
+            let res = await newFilter.save()
+        }
+        for (patient of patientData) {
+            let newPat = await PatientInfo.create(patient)
+            console.log(newPat)
+            let res = await newPat.save();
+        }
         process.exit(0)
     }).catch((err) => {
         console.log(err)

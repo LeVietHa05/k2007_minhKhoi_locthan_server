@@ -5,9 +5,9 @@ var FilterInfo = require('../models/filterInfo.js')
 var PatientInfo = require('../models/patientInfo.js')
 
 /* GET home page. */
-// router.get('/', function(req, res, next) {
-//   res.render('index', { title: 'Express' });
-// });
+router.get('/', function (req, res, next) {
+  res.sendFile('/index.html', { root: 'public' });
+});
 
 router.get('/users', async (req, res, next) => {
   try {
@@ -149,7 +149,7 @@ router.get('/patientbyaccid/:id', async (req, res, next) => {
     const patientInfo = await PatientInfo
       .findOne({ accountID: id })
       .populate('filterInfo');
-    
+
     return res.status(200).json({ msg: "success", data: patientInfo })
   } catch (e) {
     console.log(e)
