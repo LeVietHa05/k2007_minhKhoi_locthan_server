@@ -63,7 +63,7 @@ router.get('/increaefilterused', async (req, res) => {
     if (id) {
       filter = await FilterInfo.findOne({
         id: id
-      });
+      }).populate('forPatient');
     }
     if (filter) {
       filter.used += 1;
@@ -74,6 +74,17 @@ router.get('/increaefilterused', async (req, res) => {
   } catch (e) {
     console.log(e)
     return res.status(200).json({ msg: "fail", data: "Fail to save. Check data" })
+  }
+})
+
+router.get('/filter/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const filterInfo = await FilterInfo.findOne({ id: id }).populate('forPatient');
+    return res.status(200).json({ msg: "success", data: filterInfo })
+  } catch (e) {
+    console.log(e)
+    return res.status(404).json({ msg: "fail", data: "no data found" })
   }
 })
 
